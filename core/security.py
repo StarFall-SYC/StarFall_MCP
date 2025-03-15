@@ -20,9 +20,9 @@ class RiskLevel(str, Enum):
 
 class SecurityContext(BaseModel):
     """安全上下文"""
-    user_id: str
-    roles: List[str]
-    permissions: List[str]
+    user_id: Optional[str] = None
+    roles: List[str] = Field(default_factory=list)
+    permissions: List[str] = Field(default_factory=list)
     risk_level: RiskLevel = RiskLevel.LOW
     is_active: bool = True
     last_activity: datetime = Field(default_factory=datetime.now)

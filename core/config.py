@@ -5,7 +5,8 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from pydantic import BaseSettings, Field, validator
+from pydantic_settings import BaseSettings
+from pydantic import Field, validator
 from pydantic_settings import BaseSettings
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -26,9 +27,18 @@ class ConfigFileHandler(FileSystemEventHandler):
 class Settings(BaseSettings):
     """系统配置"""
     
+    # 应用配置
+    APP_NAME: str = Field(default="StarFall MCP", description="应用名称")
+    APP_VERSION: str = Field(default="1.0.0", description="应用版本")
+    
     # 基础配置
     DEBUG: bool = Field(default=False, description="调试模式")
-    ENV: str = Field(default="development", description="运行环境")
+    ENVIRONMENT: str = Field(default="production", description="运行环境")
+    WORKERS: int = Field(default=4, description="工作进程数")
+    RELOAD: bool = Field(default=False, description="热重载")
+    
+    # 安全配置
+    SECRET_KEY: str = Field(default="!9gg4f$e8^l&kq3mz2#x@d5%v7j0bn1p", min_length=32, description="加密密钥")
     
     # 安全配置
     SECRET_KEY: str = Field(..., description="加密密钥")
@@ -55,6 +65,24 @@ class Settings(BaseSettings):
     
     # 数据库配置
     DATABASE_URL: Optional[str] = Field(default=None, description="数据库连接URL")
+    DATABASE_POOL_SIZE: int = Field(default=5, description="数据库连接池大小")
+    DATABASE_MAX_OVERFLOW: int = Field(default=10, description="最大溢出连接数")
+    
+    # Redis配置
+    REDIS_URL: str = Field(default="redis://localhost:6379/0", description="Redis连接URL")
+    REDIS_POOL_SIZE: int = Field(default=5, description="Redis连接池大小")
+    
+    # JWT配置
+    JWT_ALGORITHM: str = Field(default="HS256", description="JWT算法")
+    JWT_EXPIRATION: int = Field(default=3600, description="JWT过期时间(秒)")
+    
+    # 日志配置
+    LOG_LEVEL: str = Field(default="INFO", description="日志级别")
+    LOG_FORMAT: str = Field(default="%(asctime)s - %(name)s - %(levelname)s - %(message)s", description="日志格式")
+    
+    # 监控配置
+    PROMETHEUS_ENABLED: bool = Field(default=True, description="启用Prometheus监控")
+    PROMETHEUS_PORT: int = Field(default=9090, description="Prometheus端口")
     
     class Config:
         env_file = ".env"
@@ -112,4 +140,4 @@ class Settings(BaseSettings):
 
 
 # 全局配置实例
-settings = Settings() 
+settings = Settings()

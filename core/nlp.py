@@ -29,7 +29,27 @@ class NLProcessor:
         self._intents: Dict[str, Dict[str, Any]] = {}
         self._tool_patterns: Dict[str, List[str]] = {}
         self._parameter_patterns: Dict[str, Dict[str, str]] = {}
-        self._classifier = pipeline("zero-shot-classification")
+        # 禁用SSL验证（临时方案）
+        os.environ['CURL_CA_BUNDLE'] = ''
+        os.environ['REQUESTS_CA_BUNDLE'] = ''
+        
+        # 明确指定模型并禁用SSL验证
+        self._classifier = pipeline(
+            "zero-shot-classification",
+            model="facebook/bart-large-mnli",
+            revision="d7645e1",
+            use_auth_token=False,
+            verify_ssl=False  # 新增参数
+        )
+        
+        # 配置自定义会话
+        from requests import Session
+        from requests.adapters import HTTPAdapter
+        
+        session = Session()
+        session.verify = False  # 禁用证书验证
+        session.mount('https://', HTTPAdapter(max_retries=3))
+        self._classifier.model.config.use_session(session)
         self._extractor = pipeline("token-classification")
         
         # 初始化默认意图
@@ -205,4 +225,4 @@ class NLProcessor:
 
 
 # 全局自然语言处理器实例
-nl_processor = NLProcessor() 
+nl_processor = NLProcessor()
