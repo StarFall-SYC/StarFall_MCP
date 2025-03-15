@@ -1,28 +1,10 @@
 # StarFall MCP 贡献指南
 
-## 如何开始贡献
+## 贡献流程
 
-### 1. 提交 Issue
-- 报告 Bug
-- 提出新功能建议
-- 改进文档
-- 优化性能
+### 1. 准备工作
 
-### 2. 改进文档
-- 修复拼写错误
-- 添加示例代码
-- 完善说明文档
-- 翻译文档
-
-### 3. 添加新功能
-- 实现新工具
-- 优化现有功能
-- 添加测试用例
-- 改进性能
-
-## 开发流程
-
-### 1. 准备环境
+#### 1.1 环境配置
 ```bash
 # 克隆项目
 git clone https://github.com/StarFall/starfall-mcp.git
@@ -30,36 +12,55 @@ cd starfall-mcp
 
 # 创建虚拟环境
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
+source venv/bin/activate  # Linux/macOS
+.\venv\Scripts\activate   # Windows
 
-# 安装依赖
+# 安装开发依赖
 pip install -e ".[dev]"
 ```
 
-### 2. 创建开发分支
+#### 1.2 分支管理
 ```bash
+# 更新主分支
+git checkout main
+git pull origin main
+
 # 创建功能分支
 git checkout -b feature/your-feature-name
-
-# 创建修复分支
+# 或创建修复分支
 git checkout -b fix/your-fix-name
-
-# 创建文档分支
+# 或创建文档分支
 git checkout -b docs/your-docs-name
 ```
 
-## 开发规范
+### 2. 开发规范
 
-### 1. 代码风格
-- 使用 Black 格式化代码
-- 使用 isort 排序导入
-- 使用 flake8 检查代码质量
-- 使用 mypy 进行类型检查
+#### 2.1 代码风格
+- 遵循 PEP 8 规范
+- 使用 4 个空格缩进
+- 行长度限制在 88 字符以内
+- 使用类型注解
+- 编写详细的文档字符串
 
-### 2. 提交规范
+#### 2.2 代码质量
 ```bash
-# 提交信息格式
+# 格式化代码
+black .
+
+# 排序导入
+isort .
+
+# 代码质量检查
+flake8
+
+# 类型检查
+mypy .
+```
+
+### 3. 提交规范
+
+#### 3.1 提交信息格式
+```
 <type>(<scope>): <subject>
 
 <body>
@@ -67,177 +68,113 @@ git checkout -b docs/your-docs-name
 <footer>
 ```
 
-类型说明：
-- feat: 新功能
-- fix: 修复 Bug
-- docs: 文档更新
-- style: 代码格式
-- refactor: 重构
-- test: 测试
-- chore: 构建过程或辅助工具的变动
+#### 3.2 类型说明
+- feat：新功能
+- fix：修复 Bug
+- docs：文档更新
+- style：代码格式（不影响代码运行的变动）
+- refactor：重构（既不是新增功能，也不是修改 Bug 的代码变动）
+- test：增加测试
+- chore：构建过程或辅助工具的变动
 
-### 3. 分支管理
-- main: 主分支，保持稳定
-- develop: 开发分支
-- feature/*: 功能分支
-- fix/*: 修复分支
-- release/*: 发布分支
+#### 3.3 示例
+```
+feat(auth): 添加用户认证功能
 
-## 测试
+- 实现用户注册和登录
+- 添加 JWT 令牌认证
+- 集成权限控制
 
-### 1. 运行测试
+Closes #123
+```
+
+### 4. 测试要求
+
+#### 4.1 测试规范
+- 所有新功能必须包含测试用例
+- 所有 Bug 修复必须包含回归测试
+- 测试覆盖率不得低于 80%
+
+#### 4.2 运行测试
 ```bash
 # 运行所有测试
 pytest
 
 # 运行特定测试
-pytest tests/test_tools.py
+pytest tests/test_auth.py
 
-# 运行带覆盖率报告的测试
+# 运行覆盖率测试
 pytest --cov=starfall_mcp tests/
 ```
 
-### 2. 编写测试
-```python
-def test_tool_execution():
-    """测试工具执行"""
-    # 准备测试数据
-    tool_name = "file_create"
-    params = {
-        "path": "test.txt",
-        "content": "test content"
-    }
+### 5. 提交 Pull Request
 
-    # 执行测试
-    result = execute_tool(tool_name, params)
+#### 5.1 准备工作
+- 确保所有测试通过
+- 更新文档（如有必要）
+- 添加更新日志
 
-    # 验证结果
-    assert result["status"] == "success"
-    assert os.path.exists("test.txt")
-```
-
-## 文档
-
-### 1. 生成文档
+#### 5.2 提交步骤
+1. 推送分支到远程仓库
 ```bash
-# 生成 API 文档
-sphinx-build -b html docs/source docs/build
-
-# 生成类型提示文档
-mypy starfall_mcp --html-report docs/type_report
+git push origin feature/your-feature-name
 ```
 
-### 2. 编写文档
-- 使用 Markdown 格式
-- 添加代码示例
-- 包含使用说明
-- 更新变更日志
+2. 创建 Pull Request
+- 访问 GitHub 仓库页面
+- 点击 "New Pull Request"
+- 选择目标分支（通常是 develop）
+- 填写 PR 描述
 
-## 调试
+#### 5.3 PR 描述模板
+```markdown
+## 描述
+简要描述你的改动
 
-### 1. 日志调试
-```python
-import logging
+## 改动类型
+- [ ] 新功能
+- [ ] Bug 修复
+- [ ] 文档更新
+- [ ] 代码重构
+- [ ] 其他
 
-logger = logging.getLogger(__name__)
+## 测试
+- [ ] 单元测试
+- [ ] 集成测试
+- [ ] 手动测试
 
-def debug_function():
-    logger.debug("调试信息")
-    logger.info("普通信息")
-    logger.warning("警告信息")
-    logger.error("错误信息")
+## 相关 Issue
+- #123
 ```
 
-### 2. 断点调试
-```python
-import pdb
+### 6. Code Review
 
-def complex_function():
-    # 设置断点
-    pdb.set_trace()
-    
-    # 代码执行
-    result = process_data()
-    
-    return result
-```
+#### 6.1 Review 流程
+1. 等待 Review 反馈
+2. 根据反馈进行修改
+3. 推送更新的代码
+4. 重复直到 PR 被接受
 
-## 性能优化
+#### 6.2 Review 要点
+- 代码风格是否符合规范
+- 是否包含适当的测试
+- 文档是否完整
+- 是否存在潜在问题
 
-### 1. 代码优化
-- 使用性能分析工具
-- 优化算法复杂度
-- 减少内存使用
-- 提高并发性能
+## 获取帮助
 
-### 2. 资源管理
-- 及时释放资源
-- 使用连接池
-- 实现缓存机制
-- 优化数据库查询
+### 1. 文档资源
+- [开发指南](docs/development.md)
+- [API 文档](docs/api.md)
+- [常见问题](docs/faq.md)
 
-## 安全
+### 2. 社区支持
+- 提交 [Issue](https://github.com/StarFall/starfall-mcp/issues)
+- 加入开发者社区
+- 参与技术讨论
 
-### 1. 代码安全
-- 输入验证
-- 输出转义
-- 权限控制
-- 敏感信息保护
-
-### 2. 运行时安全
-- 异常处理
-- 日志记录
-- 访问控制
-- 数据加密
-
-## 发布流程
-
-### 1. 版本管理
-```bash
-# 创建发布分支
-git checkout -b release/v1.0.0
-
-# 更新版本号
-bumpversion patch  # 小版本更新
-bumpversion minor  # 中版本更新
-bumpversion major  # 大版本更新
-
-# 合并到主分支
-git checkout main
-git merge release/v1.0.0
-```
-
-### 2. 打包发布
-```bash
-# 构建包
-python setup.py sdist bdist_wheel
-
-# 发布到 PyPI
-twine upload dist/*
-```
-
-## 常见问题
-
-### 1. 依赖安装失败
-- 检查 Python 版本
-- 更新 pip
-- 清理缓存
-- 使用镜像源
-
-### 2. 测试失败
-- 检查测试环境
-- 更新测试数据
-- 修复测试用例
-- 检查依赖版本
-
-### 3. 文档生成失败
-- 检查 Sphinx 配置
-- 修复文档格式
-- 更新依赖版本
-- 清理构建目录
-
-## 联系方式
-
-- 作者：StarFall
-- 邮箱：SYC_Hello@163.com
-- 项目主页：https://github.com/StarFall/starfall-mcp 
+### 3. 贡献者行为准则
+- 尊重其他贡献者
+- 保持专业和友善
+- 遵循项目规范
+- 积极参与讨论

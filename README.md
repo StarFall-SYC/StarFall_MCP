@@ -1,7 +1,8 @@
-<<<<<<< HEAD
 # StarFall MCP
 
-基于 MCP 协议的智能代理系统，实现自然语言到系统操作的安全转化。
+StarFall MCP 是一个强大的智能代理系统，它能够将自然语言指令安全地转化为系统操作。通过 MCP（Model-Controller-Processor）协议，系统可以准确理解用户的意图，并将其转换为可执行的操作序列，同时确保操作的安全性和可控性。
+
+本项目的核心目标是为用户提供一个安全、可靠、易用的智能操作平台，让复杂的系统操作变得简单直观。无论是系统管理、文件操作、代码处理还是浏览器自动化，StarFall MCP 都能提供统一的接口和一致的体验。
 
 [![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -10,11 +11,30 @@
 
 ## 功能特点
 
-- **自然语言接口**：解析复杂指令为可执行工作流
-- **跨平台兼容**：支持 Windows/macOS/Linux 系统操作
-- **安全优先设计**：高危操作强制确认，实时威胁检测
-- **原子化任务执行**：模块化系统操作为可审计工具
-- **可扩展架构**：支持第三方 API 与自定义插件集成
+### 1. 自然语言交互
+- 支持复杂指令解析和理解
+- 智能上下文管理和对话跟踪
+- 多轮对话支持和意图澄清
+
+### 2. 跨平台兼容
+- 完整支持 Windows/macOS/Linux 系统
+- 统一的操作接口和行为模式
+- 自动适配不同平台的特性
+
+### 3. 安全优先设计
+- 多层级权限控制和访问管理
+- 实时威胁检测和风险评估
+- 高危操作确认和审计日志
+
+### 4. 原子化任务执行
+- 操作粒度精确控制
+- 任务执行状态实时追踪
+- 失败自动回滚和恢复
+
+### 5. 可扩展架构
+- 插件化工具管理
+- 自定义工作流支持
+- 第三方 API 集成能力
 
 ## 系统要求
 
@@ -25,10 +45,29 @@
 
 ## 快速开始
 
-### 1. 安装
+## 安装
+
+### 方式一：使用 Docker（推荐）
 
 ```bash
-# 克隆仓库
+# 克隆项目
+git clone https://github.com/StarFall/starfall-mcp.git
+cd starfall-mcp
+
+# 使用 Docker Compose 启动服务
+docker-compose up -d
+```
+
+### 方式二：直接安装
+
+1. **安装系统依赖**
+   - Python 3.10+
+   - PostgreSQL 12+
+   - Redis 6.0+
+
+2. **克隆项目并安装**
+```bash
+# 克隆项目
 git clone https://github.com/StarFall/starfall-mcp.git
 cd starfall-mcp
 
@@ -38,144 +77,68 @@ source venv/bin/activate  # Linux/macOS
 .\venv\Scripts\activate   # Windows
 
 # 安装依赖
-pip install -e ".[dev]"  # 开发环境
-# 或
-pip install -e ".[test]"  # 测试环境
-# 或
-pip install -r requirements.txt  #使用依赖
-```
+pip install -r requirements.txt
 
-### 2. 配置
-
-```bash
-# 复制环境变量模板
+# 配置环境变量
 cp .env.example .env
+# 编辑 .env 文件，配置必要的环境变量
 
-# 编辑 .env 文件设置必要的配置
-```
-
-### 3. 运行
-
-```bash
 # 启动服务
-starfall run
-
-# 或使用 Python 模块
-python -m starfall_mcp.main
+python -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-### 4. 访问 API
+## 使用示例
 
-服务启动后，访问以下地址：
-- API 文档：http://localhost:8000/docs
-- 交互式文档：http://localhost:8000/redoc
+### 1. 文件操作
+```python
+from starfall_mcp import StarFallClient
 
-## 开发指南
+# 创建客户端实例
+client = StarFallClient()
 
-### 项目结构
+# 创建文件
+result = client.execute_tool('file_create', {
+    'path': 'example.txt',
+    'content': 'Hello, StarFall!'
+})
 
-```
-starfall-mcp/
-├── api/                # API 接口
-├── core/              # 核心功能
-├── models/            # 数据模型
-├── tools/             # 工具模块
-├── tests/             # 测试用例
-├── docs/              # 文档
-├── scripts/           # 脚本
-├── .env.example       # 环境变量模板
-├── setup.py           # 安装配置
-└── README.md          # 项目说明
+# 读取文件
+result = client.execute_tool('file_read', {
+    'path': 'example.txt'
+})
+print(result.output)  # 输出: Hello, StarFall!
 ```
 
-### 开发流程
+### 2. 系统操作
+```python
+# 获取系统信息
+result = client.execute_tool('system_info')
+print(result.output)
 
-1. **代码风格**
-   ```bash
-   # 格式化代码
-   black .
-   isort .
-   
-   # 类型检查
-   mypy .
-   
-   # 代码检查
-   flake8
-   ```
-
-2. **测试**
-   ```bash
-   # 运行测试
-   pytest
-   
-   # 生成覆盖率报告
-   pytest --cov=starfall_mcp --cov-report=html
-   ```
-
-3. **文档**
-   ```bash
-   # 生成文档
-   mkdocs build
-   
-   # 预览文档
-   mkdocs serve
-   ```
-
-### 添加新工具
-
-1. 在 `tools/` 目录下创建新的工具模块
-2. 继承 `BaseTool` 类并实现必要的方法
-3. 在 `tools/__init__.py` 中注册工具
-4. 添加相应的测试用例
-
-## 部署指南
-
-### Docker 部署
-
-```bash
-# 构建镜像
-docker build -t starfall-mcp .
-
-# 运行容器
-docker run -d -p 8000:8000 starfall-mcp
+# 执行系统命令
+result = client.execute_tool('system_command', {
+    'command': 'echo "Hello from StarFall!"'
+})
+print(result.output)
 ```
 
-### 系统服务部署
+### 3. 代码处理
+```python
+# 格式化代码
+result = client.execute_tool('code_format', {
+    'code': 'def hello():\n  print("Hello!")',
+    'language': 'python'
+})
+print(result.output)
+```
 
-1. 创建系统服务文件 `/etc/systemd/system/starfall-mcp.service`
-2. 配置服务
-3. 启动服务
-   ```bash
-   sudo systemctl enable starfall-mcp
-   sudo systemctl start starfall-mcp
-   ```
+## 文档
 
-## 安全说明
-
-- 所有工具执行前进行风险评估
-- 高危操作需要用户确认
-- 支持细粒度的权限控制
-- 详细的审计日志记录
-
-## 贡献指南
-
-1. Fork 项目
-2. 创建特性分支
-3. 提交更改
-4. 推送到分支
-5. 创建 Pull Request
+- [API 文档](docs/api.md)：详细的 API 接口说明
+- [开发指南](docs/development.md)：项目开发和调试指南
+- [部署指南](docs/deployment.md)：生产环境部署说明
+- [贡献指南](docs/contributing.md)：项目贡献流程和规范
 
 ## 许可证
 
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
-
-## 联系方式
-
-- 作者：StarFall
-- 邮箱：SYC_Hello@163.com
-- 项目主页：https://github.com/StarFall/starfall-mcp
-
-## 致谢
-
-感谢所有为本项目做出贡献的开发者！ 
-=======
+本项目采用 MIT 许可证，详见 [LICENSE](LICENSE) 文件。

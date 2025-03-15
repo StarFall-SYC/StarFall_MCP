@@ -2,11 +2,66 @@
 
 ## 概述
 
-StarFall MCP 提供了一套完整的 RESTful API，用于执行系统操作、管理工作流和进行安全控制。所有 API 都需要进行身份验证，并使用 JWT 令牌进行授权。
+StarFall MCP 提供了一套完整的 RESTful API，用于执行系统操作、管理工作流和进行安全控制。通过这些 API，您可以轻松地将 StarFall MCP 集成到您的应用程序中，实现自动化操作和智能控制。
+
+## 特性
+
+- **RESTful 设计**：遵循 REST 架构风格，接口清晰直观
+- **安全认证**：支持 JWT 令牌认证，确保 API 访问安全
+- **错误处理**：统一的错误处理机制，详细的错误信息
+- **限流控制**：内置请求限流机制，防止滥用
+- **文档完备**：支持 OpenAPI 规范，提供 Swagger UI 接口文档
+
+## 基础信息
+
+### 基础 URL
+```
+http://localhost:8000
+```
+
+### 响应格式
+所有 API 响应均使用 JSON 格式，并包含以下基础字段：
+```json
+{
+    "success": true,      // 操作是否成功
+    "data": {},          // 响应数据
+    "error": null,       // 错误信息
+    "message": ""       // 提示信息
+}
+```
+
+### 错误处理
+当发生错误时，API 会返回对应的 HTTP 状态码和错误信息：
+
+#### 常见错误码
+
+| 状态码 | 错误码 | 描述 |
+|--------|---------|------|
+| 400 | INVALID_REQUEST | 请求参数无效 |
+| 401 | UNAUTHORIZED | 未授权或令牌过期 |
+| 403 | FORBIDDEN | 权限不足 |
+| 404 | NOT_FOUND | 资源不存在 |
+| 429 | TOO_MANY_REQUESTS | 请求过于频繁 |
+| 500 | INTERNAL_ERROR | 服务器内部错误 |
+
+#### 错误响应示例
+```json
+{
+    "success": false,
+    "error": {
+        "code": "INVALID_REQUEST",
+        "message": "参数 'path' 不能为空",
+        "details": {
+            "field": "path",
+            "reason": "required"
+        }
+    }
+}
+```
 
 ## 认证
 
-### 获取令牌
+### 获取访问令牌
 
 ```http
 POST /token
@@ -15,59 +70,71 @@ Content-Type: application/x-www-form-urlencoded
 username=your_username&password=your_password
 ```
 
-响应：
+**参数说明：**
+- username：用户名
+- password：密码
+
+**响应示例：**
 ```json
 {
-    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-    "token_type": "bearer"
+    "success": true,
+    "data": {
+        "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+        "token_type": "bearer",
+        "expires_in": 3600
+    }
 }
 ```
 
-### 使用令牌
-
-在后续请求中，在 Header 中添加：
+### 使用访问令牌
+获取令牌后，在所有需要认证的 API 请求中添加以下 Header：
 ```
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+Authorization: Bearer <access_token>
 ```
 
 ## 工具 API
 
-### 列出工具
+### 获取工具列表
 
 ```http
 GET /tools
-Authorization: Bearer <token>
+Authorization: Bearer <access_token>
 ```
 
-响应：
+**响应示例：**
 ```json
-[
-    {
-        "name": "file_create",
-        "description": "创建新文件",
-        "category": "file",
-        "version": "1.0.0",
-        "author": "StarFall",
-        "risk_level": "low",
-        "parameters": {
-            "path": {
-                "type": "string",
-                "description": "文件路径"
-            },
-            "content": {
-                "type": "string",
-                "description": "文件内容"
+{
+    "success": true,
+    "data": [
+        {
+            "name": "file_create",
+            "description": "创建新文件",
+            "category": "file",
+            "version": "1.0.0",
+            "author": "StarFall",
+            "risk_level": "low",
+            "parameters": {
+                "path": {
+                    "type": "string",
+                    "description": "文件路径",
+                    "required": true
+                },
+                "content": {
+                    "type": "string",
+                    "description": "文件内容",
+                    "required": true
+                }
             }
         }
-    }
-]
+    ]
+}
 ```
 
 ### 执行工具
 
 ```http
 POST /tools/execute
-Authorization: Bearer <token>
+Authorization: Bearer <access_token>
 Content-Type: application/json
 
 {
@@ -79,12 +146,19 @@ Content-Type: application/json
 }
 ```
 
-响应：
+**参数说明：**
+- name：工具名称
+- parameters：工具参数，具体参数根据工具定义而定
+
+**响应示例：**
 ```json
 {
     "success": true,
-    "output": "文件 test.txt 创建成功",
-    "error": null
+    "data": {
+        "task_id": "task_12345",
+        "status": "completed",
+        "output": "文件 test.txt 创建成功"
+    }
 }
 ```
 
@@ -94,148 +168,107 @@ Content-Type: application/json
 
 ```http
 POST /workflows
-Authorization: Bearer <token>
+Authorization: Bearer <access_token>
 Content-Type: application/json
 
 {
-    "name": "测试工作流",
-    "description": "这是一个测试工作流",
+    "name": "文件处理工作流",
+    "description": "创建并处理文件的工作流",
     "steps": [
         {
             "tool": "file_create",
             "parameters": {
                 "path": "test.txt",
-                "content": "Hello, World!"
+                "content": "Hello"
+            }
+        },
+        {
+            "tool": "file_append",
+            "parameters": {
+                "path": "test.txt",
+                "content": ", World!"
             }
         }
     ]
 }
 ```
 
-响应：
+**参数说明：**
+- name：工作流名称
+- description：工作流描述
+- steps：工作流步骤列表
+  - tool：使用的工具名称
+  - parameters：工具参数
+
+**响应示例：**
 ```json
 {
-    "id": "wf_1",
-    "name": "测试工作流",
-    "description": "这是一个测试工作流",
-    "status": "pending",
-    "steps": [
-        {
-            "tool": "file_create",
-            "parameters": {
-                "path": "test.txt",
-                "content": "Hello, World!"
-            },
-            "status": "pending",
-            "result": null,
-            "error": null
-        }
-    ]
-}
-```
-
-### 获取工作流
-
-```http
-GET /workflows/{workflow_id}
-Authorization: Bearer <token>
-```
-
-响应：
-```json
-{
-    "id": "wf_1",
-    "name": "测试工作流",
-    "description": "这是一个测试工作流",
-    "status": "completed",
-    "steps": [
-        {
-            "tool": "file_create",
-            "parameters": {
-                "path": "test.txt",
-                "content": "Hello, World!"
-            },
-            "status": "completed",
-            "result": {
-                "success": true,
-                "output": "文件 test.txt 创建成功"
-            },
-            "error": null
-        }
-    ]
-}
-```
-
-### 列出工作流
-
-```http
-GET /workflows
-Authorization: Bearer <token>
-```
-
-响应：
-```json
-[
-    {
-        "id": "wf_1",
-        "name": "测试工作流",
-        "description": "这是一个测试工作流",
-        "status": "completed",
-        "steps": [...]
+    "success": true,
+    "data": {
+        "workflow_id": "wf_12345",
+        "status": "created"
     }
-]
+}
 ```
 
-### 删除工作流
+### 执行工作流
 
 ```http
-DELETE /workflows/{workflow_id}
-Authorization: Bearer <token>
+POST /workflows/{workflow_id}/execute
+Authorization: Bearer <access_token>
 ```
 
-响应：
+**响应示例：**
 ```json
 {
-    "success": true
+    "success": true,
+    "data": {
+        "execution_id": "exec_12345",
+        "status": "running"
+    }
 }
 ```
 
-## 错误处理
+### 获取工作流执行状态
 
-所有 API 在发生错误时会返回适当的 HTTP 状态码和错误信息：
+```http
+GET /workflows/executions/{execution_id}
+Authorization: Bearer <access_token>
+```
 
+**响应示例：**
 ```json
 {
-    "detail": "错误信息描述"
+    "success": true,
+    "data": {
+        "execution_id": "exec_12345",
+        "status": "completed",
+        "steps": [
+            {
+                "tool": "file_create",
+                "status": "completed",
+                "output": "文件创建成功"
+            },
+            {
+                "tool": "file_append",
+                "status": "completed",
+                "output": "文件内容追加成功"
+            }
+        ]
+    }
 }
 ```
 
-常见状态码：
-- 400：请求参数错误
-- 401：未认证
-- 403：权限不足
-- 404：资源不存在
-- 500：服务器内部错误
+## 错误码说明
 
-## 速率限制
-
-API 请求限制：
-- 认证用户：100 次/分钟
-- 未认证用户：10 次/分钟
-
-## 版本控制
-
-当前 API 版本：v1
-
-在请求头中可以指定 API 版本：
-```
-Accept: application/vnd.starfall-mcp.v1+json
-```
-
-## 安全说明
-
-1. 所有 API 请求必须使用 HTTPS
-2. 令牌有效期：30 分钟
-3. 密码传输使用 bcrypt 加密
-4. 敏感操作需要二次确认
-5. 所有操作都会记录审计日志 
+| 错误码 | 描述 | HTTP 状态码 |
+|--------|------|-------------|
+| AUTH_FAILED | 认证失败 | 401 |
+| INVALID_TOKEN | 无效的访问令牌 | 401 |
+| TOKEN_EXPIRED | 访问令牌已过期 | 401 |
+| PERMISSION_DENIED | 权限不足 | 403 |
+| INVALID_PARAMS | 无效的参数 | 400 |
+| TOOL_NOT_FOUND | 工具不存在 | 404 |
+| WORKFLOW_NOT_FOUND | 工作流不存在 | 404 |
+| EXECUTION_NOT_FOUND | 执行记录不存在 | 404 |
+| INTERNAL_ERROR | 内部服务器错误 | 500 |
