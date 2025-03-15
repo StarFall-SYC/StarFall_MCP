@@ -48,6 +48,9 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+scripts/install.exe
+scripts/build_installer.py
+scripts/app.ico
 
 # Logs
 *.log
