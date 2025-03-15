@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # StarFall MCP
 
 基于 MCP 协议的智能代理系统，实现自然语言到系统操作的安全转化。
@@ -177,3 +178,6 @@ docker run -d -p 8000:8000 starfall-mcp
 ## 致谢
 
 感谢所有为本项目做出贡献的开发者！ 
+=======
+# StarFall_MCP
+>>>>>>> 2895039a416fb71c0bf2e6cbd14df0ce1e1de403
