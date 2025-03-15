@@ -9,6 +9,8 @@ StarFall MCP 是一个强大的智能代理系统，它能够将自然语言指�
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Coverage](https://img.shields.io/badge/coverage-85%25-green.svg)](https://github.com/StarFall/starfall-mcp/actions)
 
+## 作者已经累死了，欢迎各位大佬来完善这个项目
+
 ## 功能特点
 
 ### 1. 自然语言交互
