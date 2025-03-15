@@ -179,5 +179,3 @@ docker run -d -p 8000:8000 starfall-mcp
 
 感谢所有为本项目做出贡献的开发者！ 
 =======
-# StarFall_MCP
->>>>>>> 2895039a416fb71c0bf2e6cbd14df0ce1e1de403
